@@ -19,9 +19,13 @@ permissions:
   contents: read # to fetch code (actions/checkout)
 
 jobs:
-  build-wasm-emscripten:
-    name: Build SymPy distribution for Pyodide
+  pyodide-test:
+    name: Pyodide tests, group ${{ matrix.group }}
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [1, 2, 3, 4]
     env:
       PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
@@ -72,4 +76,4 @@ jobs:
           pip install pytest pytest-split hypothesis
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20
+          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 4 --group ${{ matrix.group }}
