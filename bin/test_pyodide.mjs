@@ -1,3 +1,5 @@
+// To be deleted since not needed anymore
+
 import { argv } from 'process'
 import { readdirSync } from 'fs'
 import pyodide_pkg from '../pyodide/pyodide.js'
