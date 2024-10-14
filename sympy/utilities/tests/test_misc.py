@@ -10,7 +10,7 @@ from sympy.utilities.misc import (translate, replace, ordinal, rawlines,
                                   strlines, as_int, find_executable)
 from sympy.external import import_module
 
-pyodide_js = import_module('pyodide_js')
+# pyodide_js = import_module('pyodide_js')
 
 
 def test_translate():
