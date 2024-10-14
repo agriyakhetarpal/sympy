@@ -4,7 +4,9 @@
 
 name: Test Emscripten/Pyodide build
 
-on: [push, pull_request]
+on:
+  pull_request:
+  # push:
 
 env:
   FORCE_COLOR: 3
@@ -67,7 +69,7 @@ jobs:
           # Change to a different directory to avoid importing the local sympy folder
           # package instead of the installed one
           cd doc
-          pip install pytest pytest-split
+          pip install pytest pytest-split hypothesis
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
           pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20
