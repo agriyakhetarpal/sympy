@@ -25,6 +25,7 @@ try:
 except ImportError:
     USE_PYTEST = False
 
+IS_WASM: bool = sys.platform == 'emscripten' or platform.machine() in ["wasm32", "wasm64"]
 
 raises: Callable[[Any, Any], Any]
 XFAIL: Callable[[Any], Any]
@@ -380,17 +381,12 @@ def warns_deprecated_sympy():
         yield
 
 
-def _running_under_pyodide():
-    """Test if running under Pyodide/WASM."""
-    return sys.platform == 'emscripten' or platform.machine() in ["wasm32", "wasm64"]
-
-
 def skip_under_pyodide(message):
     """Decorator to skip a test if running under Pyodide/WASM."""
     def decorator(test_func):
         @functools.wraps(test_func)
         def test_wrapper():
-            if _running_under_pyodide():
+            if IS_WASM:
                 skip(message)
             return test_func()
         return test_wrapper

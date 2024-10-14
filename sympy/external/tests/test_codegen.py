@@ -23,7 +23,7 @@
 
 import subprocess
 from sympy.abc import x, y, z
-from sympy.testing.pytest import skip
+from sympy.testing.pytest import IS_WASM, skip
 from sympy.utilities.codegen import codegen, make_routine, get_code_generator
 import sys
 import os
@@ -114,9 +114,10 @@ combinations_lang_compiler = [
     ('F95', 'g95')
 ]
 
-
 def try_run(commands):
     """Run a series of commands and only return True if all ran fine."""
+    if IS_WASM:
+        return False
     with open(os.devnull, 'w') as null:
         for command in commands:
             retcode = subprocess.call(command, stdout=null, shell=True,
