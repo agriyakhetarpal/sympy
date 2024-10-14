@@ -11,10 +11,10 @@ from sympy.testing.runtests_pytest import (
 )
 
 
-# def test_update_args_with_rootdir():
-#     """`--rootdir` and directory three above this added as arguments."""
-#     args = update_args_with_rootdir([])
-#     assert args == ['--rootdir', str(pathlib.Path(__file__).parents[3])]
+def test_update_args_with_rootdir():
+    """`--rootdir` and directory three above this added as arguments."""
+    args = update_args_with_rootdir([])
+    assert args == ['--rootdir', str(pathlib.Path(__file__).parents[3])]
 
 
 class TestMakeAbsolutePath:

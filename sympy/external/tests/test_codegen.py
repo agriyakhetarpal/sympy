@@ -21,14 +21,13 @@
 # incorporation in various projects. The tests below assume that the binary cc
 # is somewhere in the path and that it can compile ANSI C code.
 
+import subprocess
 from sympy.abc import x, y, z
-from sympy.external import import_module
 from sympy.testing.pytest import skip
 from sympy.utilities.codegen import codegen, make_routine, get_code_generator
 import sys
 import os
 import tempfile
-import subprocess
 
 
 # pyodide_js = import_module('pyodide_js')
@@ -116,17 +115,15 @@ combinations_lang_compiler = [
 ]
 
 
-# def try_run(commands):
-#     """Run a series of commands and only return True if all ran fine."""
-#     if pyodide_js:
-#         return False
-#     with open(os.devnull, 'w') as null:
-#         for command in commands:
-#             retcode = subprocess.call(command, stdout=null, shell=True,
-#                     stderr=subprocess.STDOUT)
-#             if retcode != 0:
-#                 return False
-#     return True
+def try_run(commands):
+    """Run a series of commands and only return True if all ran fine."""
+    with open(os.devnull, 'w') as null:
+        for command in commands:
+            retcode = subprocess.call(command, stdout=null, shell=True,
+                    stderr=subprocess.STDOUT)
+            if retcode != 0:
+                return False
+    return True
 
 
 def run_test(label, routines, numerical_tests, language, commands, friendly=True):

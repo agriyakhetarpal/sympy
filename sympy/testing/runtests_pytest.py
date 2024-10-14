@@ -94,16 +94,16 @@ def sympy_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parents[2]
 
 
-# def update_args_with_rootdir(args: List[str]) -> List[str]:
-#     """Adds `--rootdir` and path to the args `list` passed to `pytest.main`.
+def update_args_with_rootdir(args: List[str]) -> List[str]:
+    """Adds `--rootdir` and path to the args `list` passed to `pytest.main`.
 
-#     This is required to ensure that pytest is able to find the SymPy tests in
-#     instances where it gets confused determining the root directory, e.g. when
-#     running with Pyodide (e.g. `bin/test_pyodide.mjs`).
+    This is required to ensure that pytest is able to find the SymPy tests in
+    instances where it gets confused determining the root directory, e.g. when
+    running with Pyodide (e.g. `bin/test_pyodide.mjs`).
 
-#     """
-#     args.extend(['--rootdir', str(sympy_dir())])
-#     return args
+    """
+    args.extend(['--rootdir', str(sympy_dir())])
+    return args
 
 
 def update_args_with_paths(
