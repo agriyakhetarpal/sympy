@@ -61,6 +61,19 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Retrieve previous test durations from cache
+        id: restore-test-durations
+        uses: actions/cache/restore@v4
+        with:
+          path: ./.test_durations_merged
+          key: sympy_pyodide_test_durations_gha_cache
+
+      - name: Rename test duration artifacts
+        if: steps.restore-test-durations.outputs.cache-hit == 'true'
+        run: |
+          mv .test_durations_merged .test_durations
+          mv .test_durations doc/.test_durations
+
       - name: Set up Pyodide virtual environment and test SymPy for Pyodide
         run: |
           # Set up Pyodide virtual environment
@@ -70,10 +83,61 @@ jobs:
           # Activate the virtual environment and install the built SymPy wheel
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
+
           # Change to a different directory to avoid importing the local sympy folder
           # package instead of the installed one
           cd doc
+
+          # Install dependencies and optional test dependencies
           pip install pytest pytest-split hypothesis
+          pip install matplotlib numpy scipy
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 4 --group ${{ matrix.group }}
+          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 4 --group ${{ matrix.group }} --save-durations
+
+      - name: Move and rename test duration artifacts
+        if: always()
+        run: mv doc/.test_durations .test_durations_${{ matrix.group }}
+
+      - name: Upload test duration artifacts
+        if: always()
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: pytest_durations_${{ matrix.group }}
+          path: .test_durations_${{ matrix.group }}
+          if-no-files-found: error
+
+  # We will collect the test durations from all groups in this job
+  # and merge them into a single file. Once all groups have finished,
+  # we will save the merged file as a persistent cache that GHA will
+  # retrieve in the next run.
+  handle-test-durations:
+    name: Merge and cache test durations
+    runs-on: ubuntu-22.04
+    needs: [pyodide-test]
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4.1.8
+        with:
+          path: all_test_durations
+          merge-multiple: true
+
+      - name: Merge test duration artifacts
+        run: |
+          mv all_test_durations/*.test_durations_* .test_durations
+          # All four files are JSON. Use JQ to merge them into one JSON file.
+          jq -s 'reduce .[] as $item ({}; . * $item)' .test_durations > .test_durations_merged
+
+      - name: Save test durations as an artifact for debugging
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: test_durations_final
+          path: .test_durations_merged
+          if-no-files-found: error
+
+      - name: Cache test durations file for subsequent runs
+        uses: actions/cache/save@v4
+        with:
+          path: .test_durations_merged
+          key: sympy_pyodide_test_durations_gha_cache
