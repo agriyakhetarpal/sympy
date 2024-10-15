@@ -125,9 +125,9 @@ jobs:
 
       - name: Merge test duration artifacts
         run: |
-          mv all_test_durations/*.test_durations_* .test_durations
-          # All four files are JSON. Use JQ to merge them into one JSON file.
-          jq -s 'reduce .[] as $item ({}; . * $item)' .test_durations > .test_durations_merged
+          mv all_test_durations/* .
+          # All four files are JSON. We use JQ to merge them into one JSON file.
+          jq -s 'add' .test_durations* > .test_durations_merged
 
       - name: Save test durations as an artifact for debugging
         uses: actions/upload-artifact@v4.4.3
