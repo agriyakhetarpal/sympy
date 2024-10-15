@@ -93,7 +93,7 @@ jobs:
           pip install matplotlib numpy scipy
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 4 --group ${{ matrix.group }} --save-durations
+          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 4 --group ${{ matrix.group }} --store-durations
 
       - name: Move and rename test duration artifacts
         if: always()
