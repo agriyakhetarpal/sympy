@@ -106,6 +106,7 @@ jobs:
           name: pytest_durations_${{ matrix.group }}
           path: doc/.test_durations_${{ matrix.group }}
           if-no-files-found: error
+          include-hidden-files: true
 
   # We will collect the test durations from all groups in this job
   # and merge them into a single file. Once all groups have finished,
@@ -135,6 +136,7 @@ jobs:
           name: test_durations_final
           path: .test_durations_merged
           if-no-files-found: error
+          include-hidden-files: true
 
       - name: Cache test durations file for subsequent runs
         uses: actions/cache/save@v4
