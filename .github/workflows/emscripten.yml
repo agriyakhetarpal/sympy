@@ -25,6 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        splits: [8] # keep in sync with number of groups below
         group: [1, 2, 3, 4, 5, 6, 7, 8]
     env:
       PYODIDE_VERSION: 0.27.0a2
@@ -93,7 +94,7 @@ jobs:
           pip install matplotlib numpy scipy
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits 8 --group ${{ matrix.group }} --store-durations
+          pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
 
       - name: Move and rename test duration artifacts
         if: always()
