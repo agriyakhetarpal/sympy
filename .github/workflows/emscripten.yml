@@ -65,13 +65,13 @@ jobs:
         id: restore-test-durations
         uses: actions/cache/restore@v4
         with:
-          path: ./.test_durations_merged
+          path: test_durations_merged.json
           key: sympy_pyodide_test_durations_gha_cache
 
       - name: Rename test duration artifacts
         if: steps.restore-test-durations.outputs.cache-hit == 'true'
         run: |
-          mv .test_durations_merged .test_durations
+          mv test_durations_merged.json .test_durations
           mv .test_durations doc/.test_durations
 
       - name: Set up Pyodide virtual environment and test SymPy for Pyodide
@@ -97,18 +97,18 @@ jobs:
 
       - name: Move and rename test duration artifacts
         if: always()
-        run: mv doc/.test_durations .test_durations_${{ matrix.group }}
+        run: mv doc/.test_durations test_durations_${{ matrix.group }}.json
 
       - name: Upload test duration artifacts
         if: always()
         uses: actions/upload-artifact@v4.4.3
         with:
           name: pytest_durations_${{ matrix.group }}
-          path: .test_durations_${{ matrix.group }}
+          path: test_durations_group_${{ matrix.group }}.json
           if-no-files-found: error
-          # dotfiles are hidden by default, so we need to include them explicitly
-          # post actions/upload-artifact@v4.4.0
-          include-hidden-files: true
+          # dotfiles are hidden by default, so we rename them
+          # post actions/upload-artifact@v4.4.0 to make them visible
+          # and to avoid needing the `include-hidden-files` option
 
   # We will collect the test durations from all groups in this job
   # and merge them into a single file. Once all groups have finished,
@@ -127,21 +127,22 @@ jobs:
           merge-multiple: true
 
       - name: Merge test duration artifacts
+        shell: bash
         run: |
-          mv all_test_durations/* .
+          # Move all test duration files to the root directory
+          mv all_test_durations/*.json .
           # All four files are JSON. We use JQ to merge them into one JSON file.
-          jq -s 'add' .test_durations* > .test_durations_merged
+          jq -s 'add' test_durations_group_*.json > test_durations_merged.json
 
       - name: Save test durations as an artifact for debugging
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: test_durations_final
-          path: .test_durations_merged
+          name: test_durations_merged
+          path: test_durations_merged.json
           if-no-files-found: error
-          include-hidden-files: true
 
       - name: Cache test durations file for subsequent runs
         uses: actions/cache/save@v4
         with:
-          path: .test_durations_merged
+          path: test_durations_merged.json
           key: sympy_pyodide_test_durations_gha_cache
