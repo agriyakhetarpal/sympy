@@ -97,14 +97,14 @@ jobs:
 
       - name: Move and rename test duration artifacts
         if: always()
-        run: mv doc/.test_durations .test_durations_${{ matrix.group }}
+        run: mv doc/.test_durations doc/.test_durations_${{ matrix.group }}
 
       - name: Upload test duration artifacts
         if: always()
         uses: actions/upload-artifact@v4.4.3
         with:
           name: pytest_durations_${{ matrix.group }}
-          path: .test_durations_${{ matrix.group }}
+          path: doc/.test_durations_${{ matrix.group }}
           if-no-files-found: error
 
   # We will collect the test durations from all groups in this job
