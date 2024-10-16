@@ -98,7 +98,7 @@ jobs:
 
       - name: Move and rename test duration artifacts
         if: always()
-        run: mv doc/.test_durations test_durations_${{ matrix.group }}.json
+        run: mv doc/.test_durations test_durations_group_${{ matrix.group }}.json
 
       - name: Upload test duration artifacts
         if: always()
