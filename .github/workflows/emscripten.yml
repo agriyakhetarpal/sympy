@@ -24,10 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Temporarily trigger just one test
-      # matrix:
-      #   splits: [8] # keep in sync with number of groups below
-      #   group: [1, 2, 3, 4, 5, 6, 7, 8]
+      matrix:
+        splits: [8] # keep in sync with number of groups below
+        group: [1, 2, 3, 4, 5, 6, 7, 8]
     env:
       PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
@@ -74,7 +73,6 @@ jobs:
         if: steps.restore-test-durations.outputs.cache-hit == 'true'
         run: |
           mv test_durations_merged.json .test_durations
-          mv .test_durations doc/.test_durations
 
       - name: Set up Pyodide virtual environment and test SymPy for Pyodide
         run: |
@@ -86,10 +84,6 @@ jobs:
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
 
-          # Change to a different directory to avoid importing the local sympy folder
-          # package instead of the installed one
-          cd doc
-
           # Install dependencies and optional test dependencies
           pip install pytest pytest-split hypothesis
           pip install matplotlib numpy scipy
@@ -97,12 +91,12 @@ jobs:
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
           # pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
 
-          # Temporarily trigger entire test suite without storing durations or splitting tests into groups
-          pytest -svra --pyargs sympy -m 'not slow'
+          # Temporarily trigger entire test suite with the right config (slow and too slow tests are skipped)
+          pytest -svra --pyargs sympy --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
 
       - name: Move and rename test duration artifacts
         if: always()
-        run: mv doc/.test_durations test_durations_group_${{ matrix.group }}.json
+        run: mv .test_durations test_durations_group_${{ matrix.group }}.json
 
       - name: Upload test duration artifacts
         if: always()
