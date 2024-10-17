@@ -25,8 +25,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        splits: [8] # keep in sync with number of groups below
-        group: [1, 2, 3, 4, 5, 6, 7, 8]
+        splits: [4] # keep in sync with number of groups below
+        group: [1, 2, 3, 4]
     env:
       PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
