@@ -98,7 +98,7 @@ jobs:
           # pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
 
           # Temporarily trigger just one test
-          pytest -svra ../sympy/solvers/ode/tests/test_systems.py::test_higher_order_to_first_order
+          pytest -svra ../sympy/solvers/ode/tests/test_systems.py
 
       - name: Move and rename test duration artifacts
         if: always()
