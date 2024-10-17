@@ -21,17 +21,14 @@
 # incorporation in various projects. The tests below assume that the binary cc
 # is somewhere in the path and that it can compile ANSI C code.
 
+import subprocess
 from sympy.abc import x, y, z
-from sympy.external import import_module
-from sympy.testing.pytest import skip
+from sympy.testing.pytest import IS_WASM, skip
 from sympy.utilities.codegen import codegen, make_routine, get_code_generator
 import sys
 import os
 import tempfile
-import subprocess
 
-
-pyodide_js = import_module('pyodide_js')
 
 # templates for the main program that will test the generated code.
 
@@ -115,10 +112,9 @@ combinations_lang_compiler = [
     ('F95', 'g95')
 ]
 
-
 def try_run(commands):
     """Run a series of commands and only return True if all ran fine."""
-    if pyodide_js:
+    if IS_WASM:
         return False
     with open(os.devnull, 'w') as null:
         for command in commands:
