@@ -54,15 +54,12 @@ jobs:
       - name: Install pyodide-build
         run: pip install pyodide-build
 
-      - name: Build SymPy wheel for Pyodide
-        run: pyodide build
-
       - name: Set up Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Retrieve previous test durations from cache
+      - name: Retrieve previous test durations from GHA cache
         id: restore-test-durations
         uses: actions/cache/restore@v4
         with:
@@ -71,28 +68,28 @@ jobs:
 
       - name: Rename test duration artifacts
         if: steps.restore-test-durations.outputs.cache-hit == 'true'
-        run: |
-          mv test_durations_merged.json .test_durations
+        run: mv test_durations_merged.json .test_durations
 
       - name: Set up Pyodide virtual environment and test SymPy for Pyodide
+        id: test-sympy
         run: |
           # Set up Pyodide virtual environment
           pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
 
-          # Activate the virtual environment and install the built SymPy wheel
+          # Activate the virtual environment and install SymPy
           source .venv-pyodide/bin/activate
-          pip install dist/*.whl
+          pip install .
 
           # Install dependencies and optional test dependencies
           pip install pytest pytest-split hypothesis
           pip install matplotlib numpy scipy
-          # Don't use the cache provider plugin, as it doesn't work with Pyodide
-          # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          # pytest -svra -p no:cacheprovider --pyargs sympy -m 'not slow' --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
 
-          # Temporarily trigger entire test suite with the right config (slow and too slow tests are skipped)
-          pytest -svra --pyargs sympy --durations 20 --splits ${{ matrix.splits }} --group ${{ matrix.group }} --store-durations
+          # Trigger test suite (slow and tooslow tests are skipped by default)
+          pytest -svra --pyargs sympy \
+          --durations 20 \
+          --splits ${{ matrix.splits }} --group ${{ matrix.group }} \
+          --store-durations
 
       - name: Move and rename test duration artifacts
         if: always()
@@ -105,7 +102,7 @@ jobs:
           name: pytest_durations_${{ matrix.group }}
           path: test_durations_group_${{ matrix.group }}.json
           if-no-files-found: error
-          # dotfiles are hidden by default, so we rename them
+          # dotfiles are hidden by default, so we rename them above
           # post actions/upload-artifact@v4.4.0 to make them visible
           # and to avoid needing the `include-hidden-files` option
 
